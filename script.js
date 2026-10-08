@@ -11,6 +11,7 @@ let notes = [];
 
 function createNoteCard(note) {
     const listItem = document.createElement("li");
+
     listItem.classList.add(
         "note-card",
         `category-${note.category.toLowerCase()}`
@@ -67,6 +68,19 @@ noteForm.addEventListener("submit", (event) => {
     event.preventDefault();
 
     const noteText = noteInput.value.trim();
+
+    if (noteText === "") {
+        errorMessage.textContent = "Please type a note first.";
+        return;
+    }
+
+    if (noteText.length > 200) {
+        errorMessage.textContent =
+            "Notes must be 200 characters or fewer.";
+        return;
+    }
+
+    errorMessage.textContent = "";
 
     const note = {
         id: Date.now(),
