@@ -9,6 +9,13 @@ const searchInput = document.querySelector("#search-input");
 let notes = [];
 
 
+/* Save notes to localStorage */
+function saveNotes() {
+    localStorage.setItem("quickNotes", JSON.stringify(notes));
+}
+
+
+/* Create one note card */
 function createNoteCard(note) {
     const listItem = document.createElement("li");
 
@@ -34,6 +41,8 @@ function createNoteCard(note) {
 
     deleteButton.addEventListener("click", () => {
         notes = notes.filter((item) => item.id !== note.id);
+
+        saveNotes();
         render();
     });
 
@@ -46,13 +55,22 @@ function createNoteCard(note) {
 }
 
 
-function render() {
+/* Display notes */
+function render(notesToRender = notes) {
     notesList.textContent = "";
 
-    notes.forEach((note) => {
-        const noteCard = createNoteCard(note);
-        notesList.appendChild(noteCard);
-    });
+    const searchTerm = searchInput.value.trim();
+
+    if (searchTerm !== "" && notesToRender.length === 0) {
+        const message = document.createElement("li");
+        message.textContent = "No notes match your search.";
+        notesList.appendChild(message);
+    } else {
+        notesToRender.forEach((note) => {
+            const noteCard = createNoteCard(note);
+            notesList.appendChild(noteCard);
+        });
+    }
 
     if (notes.length === 0) {
         noteCount.textContent = "You have no notes yet.";
@@ -64,6 +82,7 @@ function render() {
 }
 
 
+/* Add a new note */
 noteForm.addEventListener("submit", (event) => {
     event.preventDefault();
 
@@ -91,10 +110,33 @@ noteForm.addEventListener("submit", (event) => {
 
     notes.push(note);
 
+    saveNotes();
+
     noteInput.value = "";
 
     render();
 });
 
 
+/* Search notes */
+searchInput.addEventListener("input", () => {
+    const searchTerm = searchInput.value.trim().toLowerCase();
+
+    const filteredNotes = notes.filter((note) =>
+        note.text.toLowerCase().includes(searchTerm)
+    );
+
+    render(filteredNotes);
+});
+
+
+/* Load saved notes */
+const savedNotes = localStorage.getItem("quickNotes");
+
+if (savedNotes) {
+    notes = JSON.parse(savedNotes);
+}
+
+
+/* Display notes when the page loads */
 render();
